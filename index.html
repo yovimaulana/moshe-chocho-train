@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choo-Choo Math Express</title>
+<style>
+:root{--sky1:#6cc6ff;--sky2:#e3f6ff;--hill1:#7fd184;--hill2:#58b062;--card:#fffdf5;--ink:#26325b;--accent:#ff6b4a;--good:#2fb36b;--bad:#e5484d;--btn:#ffd23f;--btnink:#3a2b00;--bg:#f0f8ff;--rail:#7a4e32;--gnd:#8bd06a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#101c42;--sky2:#2a3d78;--hill1:#2f6b45;--hill2:#245a3a;--card:#232b4d;--ink:#f1f4ff;--btn:#ffc928;--bg:#0c1230;--rail:#a77450;--gnd:#2d7a45}}
+:root[data-theme="dark"]{--sky1:#101c42;--sky2:#2a3d78;--hill1:#2f6b45;--hill2:#245a3a;--card:#232b4d;--ink:#f1f4ff;--btn:#ffc928;--bg:#0c1230;--rail:#a77450;--gnd:#2d7a45}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2","Trebuchet MS","Comic Sans MS",system-ui,sans-serif;overflow-x:hidden}
+.app{max-width:760px;margin:0 auto;padding:10px;position:relative;min-height:100vh}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+h1{font-size:1.25rem;margin:0}
+.pill{background:var(--card);border-radius:99px;padding:4px 12px;font-weight:700;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.mute{border:0;background:var(--card);color:var(--ink);font-size:1.2rem;border-radius:50%;width:38px;height:38px;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.dots{display:flex;gap:4px;justify-content:center;margin:4px 0 8px}
+.dot{width:22px;height:22px;border-radius:50%;background:var(--card);border:2px solid var(--ink);font-size:.7rem;display:grid;place-items:center;font-weight:700;transition:.4s}
+.dot.on{background:var(--good);color:#fff;border-color:var(--good);transform:scale(1.15)}
+.dot.cur{background:var(--btn);color:var(--btnink);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.25)}}
+.scene{position:relative;height:240px;border-radius:20px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2));border:3px solid var(--ink)}
+.sun{position:absolute;right:30px;top:18px;width:48px;height:48px;border-radius:50%;background:#ffd84a;box-shadow:0 0 30px #ffd84a;animation:glow 3s infinite}
+@keyframes glow{50%{box-shadow:0 0 50px #ffe88a}}
+.cloud{position:absolute;font-size:2.4rem;animation:drift 40s linear infinite;opacity:.9}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(900px)}}
+.hills{position:absolute;left:0;right:0;bottom:36px;height:90px;background:radial-gradient(70px 70px at 40px 100%,var(--hill2) 98%,transparent 100%) 0 0/160px 100% repeat-x,radial-gradient(90px 90px at 100px 100%,var(--hill1) 98%,transparent 100%) 0 0/220px 100% repeat-x}
+.go .hills{animation:hills 2.5s linear infinite}
+@keyframes hills{to{background-position:-160px 0,-220px 0}}
+.ground{position:absolute;left:0;right:0;bottom:0;height:40px;background:var(--gnd)}
+.rails{position:absolute;left:0;right:0;bottom:6px;height:16px;background:repeating-linear-gradient(90deg,var(--rail) 0 10px,transparent 10px 28px);border-top:4px solid #888;border-bottom:0}
+.go .rails{animation:rails .35s linear infinite}
+@keyframes rails{to{background-position:-28px 0}}
+.trainrow{position:absolute;left:10px;bottom:20px;display:flex;align-items:flex-end;transform-origin:left bottom}
+.go .trainrow{animation:bob .3s infinite}
+@keyframes bob{50%{transform:translateY(-3px)}}
+@media(max-width:560px){.trainrow{transform:scale(.62)}.go .trainrow{animation:none}.scene{height:200px}}
+.wagon{width:78px;height:54px;background:#3a7bd5;border-radius:6px;margin-right:4px;position:relative;display:grid;place-items:center;font-size:1.8rem;border-bottom:8px solid #234a85;animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
+.wagon:before,.wagon:after{content:"";position:absolute;bottom:-14px;width:16px;height:16px;border-radius:50%;background:#333;border:3px solid #999}
+.wagon:before{left:10px}.wagon:after{right:10px}
+.wagon.out{animation:out .5s forwards}
+@keyframes pop{from{transform:scale(0) translateY(-30px)}}
+@keyframes out{to{opacity:0;transform:translateX(-40px)}}
+.engine{position:relative;width:130px;height:90px}
+.w{transform-box:fill-box;transform-origin:center}
+.go .w{animation:spin .5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.puff{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;opacity:.9;left:82px;top:2px;animation:puff 1.6s ease-out forwards;pointer-events:none}
+@keyframes puff{to{transform:translate(-55px,-70px) scale(2.6);opacity:0}}
+.banner{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(0);background:var(--btn);color:var(--btnink);padding:8px 18px;border-radius:14px;font-weight:800;font-size:1.2rem;border:3px solid var(--ink);white-space:nowrap;z-index:3}
+.banner.show{animation:ban 2s forwards}
+@keyframes ban{15%,80%{transform:translate(-50%,-50%) scale(1) rotate(-3deg)}100%{transform:translate(-50%,-50%) scale(0)}}
+.card{margin-top:10px;background:var(--card);border-radius:22px;padding:14px;text-align:center;border:3px solid var(--ink);box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.card.shake{animation:shake .45s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.card.in{animation:slide .5s}
+@keyframes slide{from{transform:translateX(60px);opacity:0}}
+.stn{font-weight:700;opacity:.8;font-size:.95rem}
+.q{font-size:clamp(2.4rem,11vw,4rem);font-weight:900;letter-spacing:2px;margin:2px 0}
+.q span{color:var(--accent)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.opt{font:inherit;font-size:2rem;font-weight:900;padding:12px;border-radius:16px;border:3px solid var(--ink);background:var(--btn);color:var(--btnink);cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.3);transition:transform .1s}
+.opt:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.opt.ok{background:var(--good);color:#fff;animation:jump .5s}
+.opt.no{background:var(--bad);color:#fff;opacity:.6;pointer-events:none}
+@keyframes jump{50%{transform:scale(1.12) rotate(-3deg)}}
+.hint{min-height:48px;margin-top:8px;font-size:1.02rem;font-weight:600}
+.hbtn{font:inherit;font-weight:700;border:2px dashed var(--ink);background:transparent;color:var(--ink);border-radius:99px;padding:4px 14px;cursor:pointer}
+.ov{position:absolute;inset:0;background:rgba(10,15,40,.72);display:grid;place-items:center;z-index:10;padding:14px;border-radius:12px}
+.ov.hide{display:none}
+.box{background:var(--card);border:4px solid var(--ink);border-radius:26px;padding:20px;text-align:center;max-width:430px;width:100%;animation:pop .6s}
+.box h2{margin:4px 0 6px;font-size:1.7rem}
+.big{font-size:3.4rem;animation:bob2 1.2s infinite}
+@keyframes bob2{50%{transform:translateY(-8px) rotate(4deg)}}
+.mode{display:block;width:100%;margin:8px 0;font:inherit;font-size:1.3rem;font-weight:800;padding:12px;border-radius:16px;border:3px solid var(--ink);background:var(--btn);color:var(--btnink);cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.3)}
+.mode:active{transform:translateY(4px);box-shadow:none}
+.cf{position:fixed;top:-20px;width:10px;height:14px;z-index:20;pointer-events:none;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(720deg)}}
+.stars{font-size:2.6rem}
+</style></head>
+<body>
+<div class="app" id="app">
+  <div class="hud">
+    <h1>🚂 Choo-Choo Math Express</h1>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span class="pill" id="stars">⭐ 0</span><span class="pill" id="lives">❤️❤️❤️</span>
+      <button class="mute" id="mute" aria-label="Sound on/off">🔊</button>
+    </div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="scene" id="scene">
+    <div class="sun"></div>
+    <div class="cloud" style="top:14px;animation-delay:-5s">☁️</div>
+    <div class="cloud" style="top:60px;animation-delay:-22s;font-size:1.8rem">☁️</div>
+    <div class="hills"></div><div class="ground"></div><div class="rails"></div>
+    <div class="banner" id="banner"></div>
+    <div class="trainrow" id="trainrow">
+      <div id="wagons" style="display:flex;align-items:flex-end"></div>
+      <div class="engine" id="engine">
+        <svg viewBox="0 0 130 90" width="130" height="90" aria-hidden="true">
+          <rect x="30" y="30" width="72" height="34" rx="10" fill="#e5484d"/>
+          <rect x="8" y="18" width="36" height="46" rx="4" fill="#c93a3f"/>
+          <rect x="3" y="12" width="46" height="8" rx="3" fill="#333"/>
+          <rect x="15" y="26" width="16" height="14" rx="2" fill="#bfe8ff"/>
+          <rect x="82" y="14" width="14" height="18" fill="#333"/><rect x="78" y="9" width="22" height="7" rx="3" fill="#333"/>
+          <circle cx="62" cy="30" r="8" fill="#ffd23f"/>
+          <polygon points="102,64 126,76 102,76" fill="#555"/>
+          <circle cx="102" cy="44" r="5" fill="#ffe066"/>
+          <rect x="6" y="62" width="98" height="8" fill="#333"/>
+          <g class="w"><circle cx="24" cy="74" r="14" fill="#444" stroke="#bbb" stroke-width="3"/><path d="M24 62v24M12 74h24" stroke="#bbb" stroke-width="3"/></g>
+          <g class="w"><circle cx="62" cy="77" r="11" fill="#444" stroke="#bbb" stroke-width="3"/><path d="M62 68v18M53 77h18" stroke="#bbb" stroke-width="3"/></g>
+          <g class="w"><circle cx="90" cy="77" r="11" fill="#444" stroke="#bbb" stroke-width="3"/><path d="M90 68v18M81 77h18" stroke="#bbb" stroke-width="3"/></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="card">
+    <div class="stn" id="stn">Next stop: …</div>
+    <div class="q" id="q">?</div>
+    <div class="opts" id="opts"></div>
+    <div class="hint" id="hint"></div>
+    <button class="hbtn" id="hbtn">💡 Need a hint?</button>
+  </div>
+
+  <div class="ov" id="ovStart"><div class="box">
+    <div class="big">🚂💨</div>
+    <h2>All aboard!</h2>
+    <p style="margin:0 0 6px;font-weight:600">Solve each sum to drive the train to the next station. Visit all 10 stations!</p>
+    <button class="mode" data-m="add">➕ Adding</button>
+    <button class="mode" data-m="sub">➖ Taking away</button>
+    <button class="mode" data-m="mix">🔀 Both!</button>
+  </div></div>
+  <div class="ov hide" id="ovEnd"><div class="box">
+    <div class="stars" id="endStars"></div>
+    <h2 id="endT"></h2>
+    <p id="endP" style="font-weight:600;margin:0 0 6px"></p>
+    <button class="mode" id="again">🚂 Play again</button>
+  </div></div>
+</div>
+
+<script>
+(function(){
+var N=10;
+var STN=["Apple Town","Bunny Hill","Cloud City","Daisy Bay","Echo Valley","Fox Forest","Gumdrop Gate","Honey Harbor","Ice Cream Pass","Rainbow Central"];
+var CARGO=["🍎","🐰","☁️","🌼","🏔️","🦊","🍬","🍯","🍦","🌈"];
+var $=function(i){return document.getElementById(i)};
+var R=function(a,b){return a+Math.floor(Math.random()*(b-a+1))};
+var mode="mix",idx=0,lives=3,stars=0,first=0,cur=null,tried=false,locked=false,muted=false;
+
+/* ---------- sound (WebAudio, no files) ---------- */
+var AC;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(AC&&AC.state==="suspended")AC.resume();return AC}
+function tone(f,d,type,v,s,f2){var a=ac();if(!a||muted)return;var t=a.currentTime+(s||0),o=a.createOscillator(),g=a.createGain();
+  o.type=type||"sine";o.frequency.setValueAtTime(f,t);if(f2)o.frequency.linearRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d)}
+function puffSnd(s,v){var a=ac();if(!a||muted)return;var len=a.sampleRate*.12,b=a.createBuffer(1,len,a.sampleRate),d=b.getChannelData(0);
+  for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  var src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+s;
+  f.type="bandpass";f.frequency.value=700;g.gain.value=v;src.buffer=b;src.connect(f);f.connect(g);g.connect(a.destination);src.start(t)}
+var sfx={
+  click:function(){tone(500,.08,"triangle",.1)},
+  ok:function(){[523,659,784,1047].forEach(function(f,i){tone(f,.25,"triangle",.16,i*.09)})},
+  no:function(){tone(180,.35,"sawtooth",.12,0,90)},
+  whistle:function(){tone(560,.25,"square",.05);tone(840,.25,"sine",.12);tone(560,.7,"square",.05,.3);tone(840,.7,"sine",.12,.3,800)},
+  chug:function(n){for(var i=0;i<n;i++){puffSnd(i*.22,.5);puffSnd(i*.22+.1,.25)}},
+  bell:function(){tone(1320,.8,"sine",.14);tone(1760,.8,"sine",.08,.05)},
+  win:function(){[523,659,784,659,784,1047,1319].forEach(function(f,i){tone(f,.3,"triangle",.18,i*.14)})},
+  lose:function(){[392,330,262].forEach(function(f,i){tone(f,.4,"triangle",.15,i*.25)})}
+};
+$("mute").onclick=function(){muted=!muted;this.textContent=muted?"🔇":"🔊";if(!muted)sfx.click()};
+
+/* ---------- questions (numbers under 100, with regrouping) ---------- */
+function genAdd(){var a,b;do{a=R(11,89);b=R(11,89)}while(a+b>99||(a%10+b%10<10&&Math.random()<.85));return{a:a,b:b,op:"+",ans:a+b}}
+function genSub(){var a,b;do{a=R(21,99);b=R(11,a-1)}while(b%10<=a%10&&Math.random()<.85);return{a:a,b:b,op:"−",ans:a-b}}
+function shuffle(x){for(var i=x.length-1;i>0;i--){var j=R(0,i),t=x[i];x[i]=x[j];x[j]=t}return x}
+function options(q){
+  var c=[q.ans+10,q.ans-10,q.ans+1,q.ans-1,q.ans+2,q.ans-2];
+  if(q.op==="−")c.push((Math.floor(q.a/10)-Math.floor(q.b/10))*10+Math.abs(q.a%10-q.b%10));
+  var seen={};seen[q.ans]=1;
+  c=shuffle(c.filter(function(v){if(v<0||v>99||seen[v])return false;seen[v]=1;return true}));
+  var o=c.slice(0,3);
+  while(o.length<3){var v=R(1,99);if(!seen[v]){seen[v]=1;o.push(v)}}
+  o.push(q.ans);return shuffle(o)}
+function hintText(q){var a=q.a,b=q.b,ta=Math.floor(a/10),tb=Math.floor(b/10),oa=a%10,ob=b%10;
+  if(q.op==="+"){var o=oa+ob,c=o>=10?1:0;
+    return "Ones first: "+oa+" + "+ob+" = "+o+(c?" → that makes 1 ten and "+(o-10)+" ones!":"")+". Then tens: "+ta+" + "+tb+(c?" + 1":"")+" = "+(ta+tb+c)+". Answer: "+q.ans+"."}
+  if(oa<ob)return "Not enough ones! Borrow a ten: "+a+" is "+(ta-1)+" tens and "+(oa+10)+" ones. Ones: "+(oa+10)+" − "+ob+" = "+(oa+10-ob)+". Tens: "+(ta-1)+" − "+tb+" = "+(ta-1-tb)+". Answer: "+q.ans+".";
+  return "Ones: "+oa+" − "+ob+" = "+(oa-ob)+". Tens: "+ta+" − "+tb+" = "+(ta-tb)+". Answer: "+q.ans+"."}
+
+/* ---------- ui helpers ---------- */
+function drawDots(){var h="";for(var i=0;i<N;i++)h+='<div class="dot'+(i<idx?" on":i===idx?" cur":"")+'">'+(i<idx?"✓":i+1)+'</div>';$("dots").innerHTML=h}
+function drawHud(){$("stars").textContent="⭐ "+stars;$("lives").textContent=lives>0?"❤️".repeat(lives):"💔"}
+function banner(t){var b=$("banner");b.textContent=t;b.classList.remove("show");void b.offsetWidth;b.classList.add("show")}
+function confetti(n){var cols=["#ff6b4a","#ffd23f","#2fb36b","#3a7bd5","#e86bd1"];
+  for(var i=0;i<n;i++){var d=document.createElement("div");d.className="cf";d.style.left=R(5,95)+"vw";d.style.background=cols[i%5];
+    d.style.setProperty("--dx",R(-80,80)+"px");d.style.animationDelay=(Math.random()*.4)+"s";document.body.appendChild(d);
+    setTimeout(function(e){e.remove()},2600,d)}}
+function smoke(){var p=document.createElement("div");p.className="puff";$("engine").appendChild(p);setTimeout(function(){p.remove()},1700)}
+setInterval(smoke,700);
+function addWagon(i){var w=document.createElement("div");w.className="wagon";w.textContent=CARGO[i];
+  $("wagons").appendChild(w);var all=$("wagons").children;
+  if(all.length>3){var old=all[0];old.classList.add("out");setTimeout(function(){old.remove()},500)}}
+
+/* ---------- game flow ---------- */
+function newQ(){
+  var m=mode==="mix"?(Math.random()<.5?"add":"sub"):mode;
+  cur=m==="add"?genAdd():genSub();tried=false;locked=false;
+  $("stn").textContent="🚉 Next stop: "+STN[idx]+"  ("+(idx+1)+"/"+N+")";
+  $("q").innerHTML=cur.a+" <span>"+cur.op+"</span> "+cur.b+" = ?";
+  $("hint").textContent="";$("hbtn").style.display="";
+  var h="";options(cur).forEach(function(v){h+='<button class="opt" data-v="'+v+'">'+v+'</button>'});
+  $("opts").innerHTML=h;
+  var c=$("card");c.classList.remove("in");void c.offsetWidth;c.classList.add("in");
+  drawDots();drawHud()}
+$("opts").onclick=function(e){var b=e.target.closest(".opt");if(!b||locked)return;
+  ac();var v=+b.dataset.v;
+  if(v===cur.ans){locked=true;b.classList.add("ok");sfx.ok();confetti(30);
+    if(!tried){first++;stars+=3}else stars+=1;
+    $("hint").textContent=["Great job! 🎉","Super! ⭐","Fantastic! 🚀","You’re a math star! 🌟"][R(0,3)];
+    drawHud();setTimeout(drive,900)}
+  else{b.classList.add("no");tried=true;sfx.no();lives--;drawHud();
+    var c=$("card");c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake");
+    $("hint").textContent="Oops! Try again. "+hintText(cur).split(". Answer")[0]+".";
+    if(lives<=0){locked=true;setTimeout(function(){finish(false)},1600)}}};
+$("hbtn").onclick=function(){sfx.click();$("hint").textContent="💡 "+hintText(cur).split(" Answer")[0]};
+
+function drive(){
+  $("scene").classList.add("go");sfx.whistle();
+  var n=0,t=setInterval(function(){sfx.chug(1);if(++n>7)clearInterval(t)},230);
+  setTimeout(function(){
+    $("scene").classList.remove("go");sfx.bell();addWagon(idx);banner("🚉 "+STN[idx]+"!");
+    idx++;drawDots();
+    if(idx>=N)setTimeout(function(){finish(true)},1500);else setTimeout(newQ,1500)},1900)}
+
+function finish(win){
+  var s=win?(first>=8?3:first>=5?2:1):0;
+  $("endStars").textContent=win?"⭐".repeat(s)+"☆".repeat(3-s):"🚂💤";
+  $("endT").textContent=win?"You made it to Rainbow Central!":"The train needs more coal!";
+  $("endP").textContent=win?"You solved "+first+" of "+N+" on the first try and earned "+stars+" stars. Choo-choo hooray!":"You reached station "+idx+" of "+N+". Practice makes a great engineer — try again!";
+  $("ovEnd").classList.remove("hide");
+  if(win){sfx.win();sfx.whistle();confetti(90);setTimeout(function(){confetti(60)},900)}else sfx.lose()}
+
+function start(m){ac();sfx.click();mode=m;idx=0;lives=3;stars=0;first=0;
+  $("wagons").innerHTML="";$("ovStart").classList.add("hide");$("ovEnd").classList.add("hide");
+  sfx.whistle();newQ()}
+document.querySelectorAll("#ovStart .mode").forEach(function(b){b.onclick=function(){start(b.dataset.m)}});
+$("again").onclick=function(){$("ovEnd").classList.add("hide");$("ovStart").classList.remove("hide");sfx.click()};
+drawDots();drawHud();
+})();
+</script>
+</body></html>
